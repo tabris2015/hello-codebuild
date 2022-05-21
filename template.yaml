@@ -56,7 +56,7 @@ Outputs:
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   HelloSamDockerApi:
-    Description: "API Gateway endpoint URL for ${Stage} stage for Hello World function"
+    Description: !Sub "API Gateway endpoint URL for ${Stage} stage for Hello World function"
     Value: !Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/"
   HelloSamDockerFunction:
     Description: "Hello World Lambda Function ARN"
