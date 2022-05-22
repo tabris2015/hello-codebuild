@@ -15,7 +15,7 @@ phases:
     commands:
       - cfn-lint -t template.yaml
       - sam build
-      - sam deploy --config-env ${STAGE}
+      - sam deploy --config-env ${STAGE} --no-confirm-changeset
 artifacts:
   files:
     - packaged-template.yaml
