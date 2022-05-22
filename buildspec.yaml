@@ -5,12 +5,12 @@ phases:
     runtime-versions:
        python: 3.8
     commands:
-      - pip install cfn-lint
+      - pip install cfn-lint aws-sam-cli
       - echo ${STAGE}
   build:
     commands:
       - cfn-lint -t template.yaml
-      - aws cloudformation package --template-file template.yaml --s3-bucket ${PACKAGE_BUCKET} --output-template-file packaged-template.yaml
+      - sam validate
 artifacts:
   files:
     - packaged-template.yaml
