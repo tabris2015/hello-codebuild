@@ -11,7 +11,7 @@ phases:
     commands:
       - cfn-lint -t template.yaml
       - sam validate
-      - sam build --use-container
+      - sam build
 artifacts:
   files:
     - packaged-template.yaml
