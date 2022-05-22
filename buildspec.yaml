@@ -5,12 +5,15 @@ phases:
     runtime-versions:
        python: 3.8
     commands:
-      - pip install cfn-lint aws-sam-cli
+      - pip install cfn-lint aws-sam-cli -q
       - echo ${STAGE}
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
   build:
     commands:
       - cfn-lint -t template.yaml
-      - sam validate
       - sam build
 artifacts:
   files:
