@@ -6,6 +6,7 @@ phases:
        python: 3.8
     commands:
       - pip install cfn-lint
+      - echo "Stage: ${STAGE}"
   build:
     commands:
       - cfn-lint -t template.yaml
