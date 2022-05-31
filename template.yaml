@@ -1,13 +1,16 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  sam-test
+  fastapi_dynamodb
 
-  Sample SAM Template for sam-test docker
+  Sample SAM Template for FastAPI + DynamoDB application
 
 Parameters:
   Stage:
     Type: String
+  TableNamePrefix:
+    Type: String
+    Default: users
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -24,15 +27,20 @@ Resources:
       OpenApiVersion: '3.0.0'
       StageName: !Ref Stage
 
-  HelloSamDockerFunction:
+  FastAPIDynamoFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      PackageType: Image
+      CodeUri: ./app
+      Handler: main.handler
+      Runtime: python3.8
+      PackageType: Zip
       Architectures:
         - x86_64
-      MemorySize: 512
-      ImageConfig:
-        Command: ["app.handler"]
+      Policies:
+        - SSMParameterReadPolicy:
+            ParameterName: !Ref TableNameParameter
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTable
       Events:
         Root:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
@@ -46,21 +54,39 @@ Resources:
             Path: /{proxy+}
             Method: ANY
             RestApiId: !Ref ApiGatewayApi
-    Metadata:
-      DockerContext: ./
-      Dockerfile: Dockerfile
-      DockerTag: python3.8-v1
+
+  DynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${TableNamePrefix}-${Stage}"
+      AttributeDefinitions:
+        - AttributeName: username
+          AttributeType: S
+      KeySchema:
+        - AttributeName: username
+          KeyType: HASH   # partition key
+      BillingMode: PAY_PER_REQUEST    #
+
+  TableNameParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "table-name-${Stage}"
+      Type: String
+      Value: !Ref DynamoDBTable
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloSamDockerApi:
-    Description: "API Gateway endpoint URL for stage for Hello World function"
+  FastAPIDynamoApi:
+    Description: "API Gateway endpoint URL for FastAPI application"
     Value: !Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/"
-  HelloSamDockerFunction:
-    Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt HelloSamDockerFunction.Arn
-  HelloSamDockerFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloSamDockerFunctionRole.Arn
+  FastAPIDynamoFunction:
+    Description: "FastAPI app Lambda Function ARN"
+    Value: !GetAtt FastAPIDynamoFunction.Arn
+  FastAPIDynamoFunctionIamRole:
+    Description: "Implicit IAM Role created for FastAPI app function"
+    Value: !GetAtt FastAPIDynamoFunctionRole.Arn
+  DynamoDBTable:
+    Description: "DynamoDB table name ARN"
+    Value: !GetAtt DynamoDBTable.Arn
