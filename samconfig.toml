@@ -3,9 +3,9 @@ version = 0.1
 [dev]
 [dev.deploy]
 [dev.deploy.parameters]
-stack_name = "hello-codebuild-dev"
+stack_name = "hello-fastapi-lambda"
 s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1grgpdxgovdy"
-s3_prefix = "hello-codebuild-dev"
+s3_prefix = "hello-fastapi-lambda"
 region = "us-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"

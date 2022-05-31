@@ -27,7 +27,7 @@ def list_users(limit: int = 100):
 
 @app.get("/")
 def root():
-    return {"message": "hello", "stage": stage}
+    return {"message": "built with codebuild", "stage": stage}
 
 
 handler = Mangum(app)
