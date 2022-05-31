@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: CLoudformation template for codebuild project
+
+Parameters:
+  GitHubAccessToken:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Name of parameter with GitHub access token
+    Default: codebuild-github-token
+    NoEcho: True
+
+Resources:
+  CodeBuildCredentials:
+    Type: AWS::CodeBuild::SourceCredential
+    Properties:
+      ServerType: GITHUB
+      AuthType: PERSONAL_ACCESS_TOKEN
+      Token: !Ref GitHubAccessToken

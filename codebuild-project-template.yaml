@@ -1,0 +1,79 @@
+Parameters:
+  GitHubUrl:
+    Type: String
+    Description: URL for GitHub repo i.e. https://github.com/username/repository
+    Default: https://github.com/tabris2015/hello-codebuild
+
+Resources:
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+            - Effect: Allow
+              Principal:
+                  Service:
+                    - codebuild.amazonaws.com
+              Action:
+                - sts:AssumeRole
+      Description: !Sub "IAM Role for ${AWS::StackName}"
+      Path: '/'
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow     # Mala practica, CAMBIAR
+                Action:
+                  - cloudformation:*
+                  - codebuild:*
+                  - logs:*
+                  - dynamodb:*
+                  - lambda:*
+                  - s3:*
+                  - cloudwatch:*
+                  - ssm:*
+                  - iam:*
+                  - apigateway:*
+                Resource: '*'
+  CodeBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Description: CodeBuild with GitHub webhook
+      Triggers:
+        BuildType: BUILD
+        Webhook: True
+        FilterGroups:
+        - - Type: EVENT
+            Pattern: PUSH,PULL_REQUEST_MERGED
+          - Type: HEAD_REF
+            Pattern: ^refs/heads/master$
+            ExcludeMatchedPattern: false
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:4.0
+        EnvironmentVariables:
+          - Name: STAGE
+            Value: staging
+            Type: PLAINTEXT
+      Source:
+        Type: GITHUB
+        Location: !Ref GitHubUrl
+        BuildSpec: buildspec.yaml
+        GitCloneDepth: 1
+      TimeoutInMinutes: 10
+  CodeBuildLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/codebuild/${CodeBuild}"
+      RetentionInDays: 7
+
+Outputs:
+  ProjectName:
+    Value: !Ref CodeBuild
+    Description: CodeBuild project name
