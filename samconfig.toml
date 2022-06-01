@@ -22,7 +22,7 @@ region = "us-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 parameter_overrides = "Stage=\"prod\""
-image_repositories = ["HelloSamDockerFunction=230832512561.dkr.ecr.us-east-1.amazonaws.com/samdockere9ade4b1/hellosamdockerfunctione409fd1erepo"]
+image_repositories = []
 
 [staging]
 [staging.deploy]
